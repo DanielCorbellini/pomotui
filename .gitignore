@@ -1,3 +1,5 @@
 /target
 .vscode
 rust_learnings.md
+Cargo.lock
+/ideas
