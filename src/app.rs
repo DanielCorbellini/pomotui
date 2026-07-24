@@ -64,23 +64,25 @@ impl App {
     }
 
     pub fn tick(&mut self) {
-        if self.timer_status == TimerStatus::Running {
-            let elapsed = self.last_tick.elapsed();
-
-            if self.time_remaining > elapsed {
-                self.time_remaining -= elapsed;
-                self.last_tick = Instant::now();
-            } else {
-                self.time_remaining = Duration::from_secs(0);
-                self.timer_status = TimerStatus::Finished;
-            }
+        if self.timer_status != TimerStatus::Running {
+            return;
         }
+
+        let elapsed = self.last_tick.elapsed();
+
+        if self.time_remaining > elapsed {
+            self.time_remaining -= elapsed;
+            self.last_tick = Instant::now();
+            return;
+        }
+
+        self.time_remaining = Duration::ZERO;
+        self.timer_status = TimerStatus::Finished;
     }
 
     pub fn toggle_timer(&mut self) {
         match self.timer_status {
             TimerStatus::Paused | TimerStatus::Finished => {
-                // Se havia finalizado, reseta antes de reiniciar
                 if self.timer_status == TimerStatus::Finished {
                     self.reset_timer();
                 }
@@ -112,5 +114,15 @@ impl App {
         if let Some(prev_tab) = Tab::from_index(prev_index) {
             self.active_tab = prev_tab;
         }
+    }
+
+    pub fn progress_percent(&self) -> u16 {
+        let total_secs = self.total_duration.as_secs();
+        if total_secs == 0 {
+            return 0;
+        }
+
+        let elapsed = total_secs.saturating_sub(self.time_remaining.as_secs());
+        ((elapsed as f64 / total_secs as f64) * 100.0) as u16
     }
 }

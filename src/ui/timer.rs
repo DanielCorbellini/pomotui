@@ -68,7 +68,7 @@ pub fn render(app: &App, frame: &mut Frame, area: Rect) {
 
     let scale_w = (inner_area.width / 29) as usize;
     let scale_h = ((inner_area.height.saturating_sub(4)) / 5) as usize;
-    let scale = scale_w.min(scale_h).max(1);
+    let scale = scale_w.min(scale_h).clamp(1, 7);
     let clock_height = (5 * scale) as u16;
 
     let inner_chunks = Layout::default()
@@ -98,12 +98,7 @@ pub fn render(app: &App, frame: &mut Frame, area: Rect) {
         );
     frame.render_widget(clock, inner_chunks[1]);
 
-    let percent = if app.total_duration.as_secs() > 0 {
-        let elapsed = app.total_duration.as_secs() - app.time_remaining.as_secs();
-        ((elapsed as f64 / app.total_duration.as_secs() as f64) * 100.0) as u16
-    } else {
-        0
-    };
+    let percent = app.progress_percent();
 
     let gauge_horizontal = Layout::default()
         .direction(Direction::Horizontal)
